@@ -1,0 +1,74 @@
+select CD.*,P.SEKeywords
+--Update P SET P.SEKeywords=CD.SEKeywords
+from product  p 
+Inner join ProductDistributor PD on P.ProductID=PD.ProductID
+inner join Distributor D on PD.DistributorID=D.DistributorID
+Inner join ProductManuFacturer PM on P.ProductID=PM.ProductID
+Inner join Manufacturer M on PM.ManufacturerID=M.ManufacturerID
+inner join ProductCategory pc on p.ProductID = pc.ProductID 
+inner join VeeTrendsDB_Backup..CostumesKeyWords	CD ON P.ManufacturerPartNumber=CD.ManufacturerPartNumber
+													AND M.Name=CD.Brand
+													AND D.Name=CD.Distributor
+where CategoryID = 242
+and Cast(P.SEKeywords as Varchar(max))<>Cast(CD.SEKeywords as varchar(max))
+
+khan.ghazanfar@amanrasoft.com;
+ Muhammad Shadab Hussain <hussain.muhammad@amanrasoft.com>;
+ 'hussain.aman@amanrasoft.com'; 
+Muhammad Danish Imtiaz <imtiaz.muhammad@amanrasoft.com>; 
+jabbar.neha@amanrasoft.com; fareed.syed@amanrasoft.com;
+ Nabeel Ahmed <nabeel@amanrasoft.com>;
+ awais.muhammad@amanrasoft.com; 
+ahmed.nabeel@amanrasoft.com; 
+azam.waqas@amanrasoft.com; 
+khurshid.mohsin@amanrasoft.com
+
+
+--select * from Section
+--select * from QuantityDiscount 
+--select * from QuantityDiscountTable  
+--[dbo].[sp_GetProductListingAllData]
+
+
+use veetrends
+-- SUM OF TOTAL and COUNT OF ORDERS 
+
+select sum(OrderTotal) as totalAmount,year(orderdate) as YEAR, month(orderdate)  MONTH , count(ordernumber) TotalNoOfOrders  from orders 
+where  TransactionState  in ('CAPTURED','AUTHORIZED') and  year(orderdate) = '2018'
+group by year(orderdate)  , month(orderdate) 
+order by 2,3 desc  -- 30783.4576
+
+--TOTAL AMOUNT PER DAY
+select sum(OrderTotal) as totalAmount, convert(date,orderdate)  from orders 
+where  TransactionState  in ('CAPTURED','AUTHORIZED') and convert(date,orderdate) >= '2018-09-01'
+group by  convert(date,orderdate) 
+order by 2 desc  -- 30783.4576
+--TOTAL ORDERS PER DAY
+select count(ordernumber) as totalOrderNumber, convert(date,orderdate)  from orders 
+where  TransactionState  in ('CAPTURED','AUTHORIZED') and convert(date,orderdate) >= '2018-09-01'
+group by  convert(date,orderdate) 
+order by 2 desc  -- 30783.4576
+select count (CustomerID) as NoOfCustomer ,year(RegisterDate) as [Year] , month(RegisterDate) as [Month] from customer where IsRegistered = 1 
+group by year(RegisterDate), month(RegisterDate)
+order by 2 desc  -- 30783.4576
+
+--TOP 10 SELLING PRODUCTS 
+select count(o.OrderNumber) NoOfOrder ,  p.Name from Product p inner join Orders_ShoppingCart  os on p.ProductID = os.ProductID
+inner join orders o on o.OrderNumber = os.OrderNumber
+where TransactionState  in ('CAPTURED','AUTHORIZED') and cast(o.orderdate as date ) >= '2018-09-01' 
+group by p.Name 
+
+
+
+
+--select count(*) from NewCustomerSession 
+
+
+
+// Update Queries with in two databases
+
+update tmp set productname = pr.name,productdescription=pr.description,CareInstruction=pr.CareInstructions , fabrictype = pr.fabrictype
+--select distinct productname , pr.name,productdescription,pr.description,CareInstruction,pr.CareInstructions
+from 
+[dbo].[Veetrend_TempProduct] tmp 
+inner join development..Veetrends_Product pr on tmp.productid=pr.productid
